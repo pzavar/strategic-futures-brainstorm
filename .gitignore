@@ -22,6 +22,10 @@ build/
 .env.local
 .env.*.local
 
+# But track .env.example files (templates for users)
+!.env.example
+!**/.env.example
+
 # IDEs
 .vscode/
 .idea/
@@ -57,3 +61,9 @@ Thumbs.db
 # Alembic
 alembic/versions/*.pyc
 
+# Documentation files (internal development use only)
+TROUBLESHOOTING.md
+VERIFICATION.md
+GITHUB_READY_CHECKLIST.md
+TESTING.md
+backend/TROUBLESHOOTING.md

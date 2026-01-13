@@ -7,7 +7,7 @@ export const Navbar = () => {
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <Link to="/" className="text-2xl font-bold text-primary-600 hover:text-primary-700 transition-colors">
-              Strategic Futures AI
+              Strategic Futures Analysis
             </Link>
           </div>
           <div className="flex items-center gap-4">
@@ -18,10 +18,10 @@ export const Navbar = () => {
                   App
                 </Link>
                 <Link
-                  to="/dashboard"
+                  to="/history"
                   className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium"
                 >
-                  Dashboard
+                  History
                 </Link>
           </div>
         </div>

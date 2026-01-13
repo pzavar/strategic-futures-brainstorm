@@ -1,135 +1,91 @@
-# Strategic Futures AI 🔮
+# Strategic Futures AI
 
-> An AI-powered web application that generates diverse future scenarios and strategic recommendations for companies using a multi-agent LangGraph pipeline.
+An AI-powered web application that generates diverse future scenarios and strategic recommendations for companies using a multi-agent LangGraph pipeline.
 
-## 📋 Table of Contents
+## Overview
 
-- [Overview](#overview)
-- [Features](#features)
-- [Tech Stack](#tech-stack)
-- [Prerequisites](#prerequisites)
-- [Getting Started](#getting-started)
-  - [1. Clone the Repository](#1-clone-the-repository)
-  - [2. Set Up API Keys](#2-set-up-api-keys)
-  - [3. Backend Setup](#3-backend-setup)
-  - [4. Frontend Setup](#4-frontend-setup)
-- [Running the Application](#running-the-application)
-- [Project Structure](#project-structure)
-- [API Documentation](#api-documentation)
-- [Troubleshooting](#troubleshooting)
-- [Contributing](#contributing)
-- [License](#license)
+Strategic Futures AI helps organizations explore potential future scenarios and develop strategic recommendations. It uses a 3-agent pipeline powered by Groq's Llama 3.1 70B and Tavily's web search:
 
-## 🎯 Overview
+1. **Research Agent** - Conducts industry research, competitive landscape analysis, and identifies emerging trends
+2. **Scenario Agent** - Generates 4 diverse future scenarios based on strategic axes
+3. **Strategy Agent** - Develops actionable strategic recommendations for each scenario
 
-Strategic Futures AI is a powerful tool that helps organizations explore potential future scenarios and develop strategic recommendations. It leverages a sophisticated 3-agent pipeline powered by **Groq's Llama 3.1 70B** and **Tavily's web search** to:
+The application provides real-time progress updates using Server-Sent Events (SSE).
 
-1. **Research Agent**: Conducts comprehensive industry research, competitive landscape analysis, and identifies emerging trends
-2. **Scenario Agent**: Generates 4 diverse future scenarios based on strategic axes (certainty vs. uncertainty, opportunity vs. threat)
-3. **Strategy Agent**: Develops 2-3 actionable strategic recommendations for each scenario
+## Key Features
 
-The application provides real-time progress updates using Server-Sent Events (SSE), allowing users to watch the AI agents work through each stage of the analysis.
+- Multi-agent AI pipeline with specialized research, scenario, and strategy agents
+- Real-time progress tracking via Server-Sent Events
+- Comprehensive industry research and competitive analysis
+- Diverse scenario planning based on strategic frameworks
+- Actionable recommendations for each scenario
+- Analysis history to save and revisit previous analyses
+- JWT-based authentication
+- Modern, responsive UI built with React and TailwindCSS
 
-## ✨ Features
+## Tech Stack
 
-- 🤖 **Multi-Agent AI Pipeline**: Three specialized agents working in sequence
-- 📡 **Real-time Progress Tracking**: Live updates via Server-Sent Events
-- 🔍 **Comprehensive Research**: Industry insights, competitive analysis, and trend identification
-- 🎲 **Diverse Scenario Planning**: 4 distinct future scenarios based on strategic frameworks
-- 💡 **Actionable Strategies**: Concrete recommendations for each scenario
-- 📊 **Analysis History**: Save and revisit previous analyses
-- 🔐 **Secure Authentication**: JWT-based user authentication
-- 🎨 **Modern UI**: Clean, responsive interface built with React and TailwindCSS
+**Backend**
+- FastAPI - Python web framework
+- PostgreSQL - Database
+- SQLAlchemy & Alembic - ORM and migrations
+- LangGraph - Multi-agent orchestration
+- Groq API - LLM inference (Llama 3.1 70B)
+- Tavily API - Web search
+- JWT - Authentication
 
-## 🛠 Tech Stack
+**Frontend**
+- React & TypeScript
+- Vite - Build tool
+- TailwindCSS - Styling
+- React Router - Routing
+- Axios - HTTP client
 
-### Backend
-- **FastAPI** - Modern Python web framework
-- **PostgreSQL** - Relational database
-- **SQLAlchemy** - ORM and database toolkit
-- **Alembic** - Database migrations
-- **LangGraph** - Multi-agent orchestration
-- **Groq API** - Fast LLM inference (Llama 3.1 70B)
-- **Tavily API** - AI-powered web search
-- **JWT** - Secure authentication
+## Prerequisites
 
-### Frontend
-- **React** - UI library
-- **TypeScript** - Type-safe JavaScript
-- **Vite** - Fast build tool
-- **TailwindCSS** - Utility-first CSS framework
-- **React Router** - Client-side routing
-- **Axios** - HTTP client
+You'll need the following installed:
+- Python 3.11 or higher
+- Node.js 18 or higher
+- PostgreSQL 14 or higher
+- Git
 
-## 📦 Prerequisites
+You'll also need API keys (free tiers available):
+- Groq: [https://console.groq.com/keys](https://console.groq.com/keys)
+- Tavily: [https://app.tavily.com/](https://app.tavily.com/)
 
-Before you begin, ensure you have the following installed:
+## Getting Started
 
-- **Python 3.11 or higher** ([Download](https://www.python.org/downloads/))
-- **Node.js 18 or higher** ([Download](https://nodejs.org/))
-- **PostgreSQL 14 or higher** ([Download](https://www.postgresql.org/download/))
-- **Git** ([Download](https://git-scm.com/downloads))
-
-You'll also need API keys from:
-- **Groq** (free tier available): [https://console.groq.com/keys](https://console.groq.com/keys)
-- **Tavily** (free tier available): [https://app.tavily.com/](https://app.tavily.com/)
-
-## 🚀 Getting Started
-
-### 1. Clone the Repository
+### 1. Clone and Configure
 
 ```bash
 git clone https://github.com/yourusername/strategic-futures-brainstorm.git
 cd strategic-futures-brainstorm
 ```
 
-### 2. Set Up API Keys
+### 2. Set Up Environment Variables
 
-#### Obtain Your API Keys
-
-**Groq API Key:**
-1. Visit [https://console.groq.com/keys](https://console.groq.com/keys)
-2. Sign up or log in
-3. Click "Create API Key"
-4. Copy your API key (save it securely - you won't see it again!)
-
-**Tavily API Key:**
-1. Visit [https://app.tavily.com/](https://app.tavily.com/)
-2. Sign up or log in
-3. Navigate to API Keys section
-4. Copy your API key
-
-#### Configure Backend Environment
-
+Create backend configuration:
 ```bash
 cd backend
 cp .env.example .env
 ```
 
-Open `backend/.env` in your text editor and replace the placeholder values:
-
+Edit `backend/.env` with your values:
 ```bash
-# Update these with your actual values:
 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/strategic_futures_db
-GROQ_API_KEY=your_actual_groq_api_key_here
-TAVILY_API_KEY=your_actual_tavily_api_key_here
-
-# Generate a secure JWT secret (you can use: openssl rand -hex 32)
-JWT_SECRET=your_secure_random_string_here
-
-# Leave these as default for local development
+GROQ_API_KEY=your_groq_api_key
+TAVILY_API_KEY=your_tavily_api_key
+JWT_SECRET=your_secure_random_string  # Generate with: openssl rand -hex 32
 CORS_ORIGINS=http://localhost:5173,http://localhost:3000
 ```
 
-#### Configure Frontend Environment
-
+Create frontend configuration:
 ```bash
 cd ../frontend
 cp .env.example .env
 ```
 
 The default values should work for local development:
-
 ```bash
 VITE_API_URL=http://localhost:8000
 ```
@@ -137,242 +93,127 @@ VITE_API_URL=http://localhost:8000
 ### 3. Backend Setup
 
 ```bash
-# Navigate to backend directory (if not already there)
 cd backend
 
 # Create and activate virtual environment
 python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
 
-# On macOS/Linux:
-source venv/bin/activate
-
-# On Windows:
-# venv\Scripts\activate
-
-# Install Python dependencies
+# Install dependencies
 pip install -r requirements.txt
 
-# Create PostgreSQL database
+# Ensure PostgreSQL is running, then create database
 createdb strategic_futures_db
 
-# Run database migrations
+# Run migrations
 alembic upgrade head
 ```
-
-**Note:** If you don't have PostgreSQL running, start it first:
-- **macOS** (Homebrew): `brew services start postgresql@14`
-- **macOS** (Postgres.app): Open Postgres.app from Applications
-- **Linux**: `sudo systemctl start postgresql`
-- **Windows**: Start PostgreSQL service from Services panel
 
 ### 4. Frontend Setup
 
 ```bash
-# Navigate to frontend directory
 cd ../frontend
-
-# Install Node.js dependencies
 npm install
 ```
 
-## 🎮 Running the Application
+## Running the Application
 
-You'll need **two terminal windows** - one for the backend and one for the frontend.
+Open two terminal windows:
 
-### Terminal 1: Start the Backend
-
+**Terminal 1 - Backend:**
 ```bash
 cd backend
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate  # Windows: venv\Scripts\activate
 uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-You should see:
-```
-INFO:     Uvicorn running on http://0.0.0.0:8000
-INFO:     Application startup complete.
-```
-
-### Terminal 2: Start the Frontend
-
+**Terminal 2 - Frontend:**
 ```bash
 cd frontend
 npm run dev
 ```
 
-You should see:
-```
-VITE v5.x.x  ready in xxx ms
+Open your browser to [http://localhost:5173](http://localhost:5173)
 
-➜  Local:   http://localhost:5173/
-➜  Network: use --host to expose
-```
-
-### Access the Application
-
-Open your browser and navigate to: **[http://localhost:5173](http://localhost:5173)**
-
-1. Create an account (Register)
+1. Register an account
 2. Log in
 3. Enter a company name to analyze
-4. Watch the AI agents work in real-time!
+4. Watch the AI agents work in real-time
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 strategic-futures-brainstorm/
 ├── backend/
 │   ├── app/
-│   │   ├── agents/              # LangGraph AI agents
-│   │   │   ├── pipeline.py      # Agent orchestration
-│   │   │   ├── research_agent.py
-│   │   │   ├── scenario_agent.py
-│   │   │   └── strategy_agent.py
-│   │   ├── api/
-│   │   │   ├── routes/          # API endpoints
-│   │   │   │   ├── analyses.py  # Analysis CRUD + streaming
-│   │   │   │   └── auth.py      # Authentication
-│   │   │   └── dependencies.py  # Dependency injection
-│   │   ├── core/
-│   │   │   ├── config.py        # Configuration settings
-│   │   │   ├── database.py      # Database connection
-│   │   │   └── security.py      # JWT authentication
-│   │   ├── models/              # SQLAlchemy database models
-│   │   │   ├── analysis.py
-│   │   │   ├── scenario.py
-│   │   │   ├── strategy.py
-│   │   │   └── user.py
-│   │   └── services/            # External API clients
-│   │       ├── groq_service.py  # Groq LLM integration
-│   │       └── tavily_service.py # Tavily search integration
-│   ├── alembic/                 # Database migrations
-│   ├── tests/                   # Unit and integration tests
-│   ├── main.py                  # FastAPI application entry point
-│   ├── requirements.txt         # Python dependencies
-│   └── .env.example             # Environment variables template
+│   │   ├── agents/           # LangGraph AI agents (pipeline, research, scenario, strategy)
+│   │   ├── api/              # API routes (analyses, auth) and dependencies
+│   │   ├── core/             # Configuration, database, security
+│   │   ├── models/           # SQLAlchemy models (analysis, scenario, strategy, user)
+│   │   └── services/         # External API clients (Groq, Tavily)
+│   ├── alembic/              # Database migrations
+│   ├── tests/                # Unit and integration tests
+│   └── main.py               # FastAPI entry point
 │
-├── frontend/
-│   ├── src/
-│   │   ├── components/          # React components
-│   │   │   ├── CompanyInput.tsx
-│   │   │   ├── AnalysisStatus.tsx
-│   │   │   ├── AnalysisResults.tsx
-│   │   │   ├── ScenarioCard.tsx
-│   │   │   ├── StrategyCard.tsx
-│   │   │   └── ...
-│   │   ├── pages/               # Page components
-│   │   │   ├── Home.tsx
-│   │   │   ├── Dashboard.tsx
-│   │   │   ├── Login.tsx
-│   │   │   └── AnalysisViewPage.tsx
-│   │   ├── services/            # API clients
-│   │   │   ├── api.ts           # REST API client
-│   │   │   ├── auth.ts          # Authentication service
-│   │   │   └── sse.ts           # Server-Sent Events client
-│   │   ├── hooks/               # Custom React hooks
-│   │   │   ├── useAuth.tsx
-│   │   │   ├── useAnalysis.ts
-│   │   │   └── useAnalysisStream.ts
-│   │   └── App.tsx              # Root component
-│   ├── package.json             # Node.js dependencies
-│   └── .env.example             # Environment variables template
-│
-└── README.md                    # This file
+└── frontend/
+    └── src/
+        ├── components/       # React components
+        ├── pages/            # Page components
+        ├── services/         # API clients (REST, SSE, auth)
+        ├── hooks/            # Custom React hooks
+        └── App.tsx           # Root component
 ```
 
-## 📚 API Documentation
+## API Documentation
 
-Once the backend is running, visit [http://localhost:8000/docs](http://localhost:8000/docs) for interactive API documentation (Swagger UI).
+Once running, visit [http://localhost:8000/docs](http://localhost:8000/docs) for interactive Swagger UI documentation.
 
-### Key Endpoints
+**Key Endpoints:**
+- `POST /api/auth/register` - Register a new user
+- `POST /api/auth/login` - Login and receive JWT token
+- `POST /api/analyses` - Create a new analysis
+- `GET /api/analyses` - List all user's analyses
+- `GET /api/analyses/{id}` - Get specific analysis details
+- `GET /api/analyses/{id}/stream` - SSE stream for real-time updates
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/auth/register` | Register a new user |
-| POST | `/api/auth/login` | Login and receive JWT token |
-| POST | `/api/analyses` | Create a new analysis |
-| GET | `/api/analyses` | List all user's analyses |
-| GET | `/api/analyses/{id}` | Get specific analysis details |
-| GET | `/api/analyses/{id}/stream` | SSE stream for real-time updates |
+## Troubleshooting
 
-## 🔧 Troubleshooting
-
-### Database Connection Issues
-
-**Error:** `could not connect to server: Connection refused`
-
-**Solution:** Ensure PostgreSQL is running:
+**Database Connection Issues**
 ```bash
 # Check if PostgreSQL is running
 pg_isready
 
-# Start PostgreSQL (macOS with Homebrew)
+# Start PostgreSQL (macOS)
 brew services start postgresql@14
-
-# Or restart it
-brew services restart postgresql@14
 ```
 
-### API Key Issues
+**API Key Issues**
+- Verify API keys in `backend/.env`
+- Ensure no extra spaces or quotes around keys
+- Regenerate keys if needed
 
-**Error:** `401 Unauthorized` or `Invalid API key`
-
-**Solution:** 
-1. Verify your API keys in `backend/.env`
-2. Make sure there are no extra spaces or quotes around the keys
-3. Regenerate keys if needed from the respective platforms
-
-### Port Already in Use
-
-**Error:** `Address already in use`
-
-**Solution:** 
+**Port Already in Use**
 ```bash
-# Find what's using port 8000 (backend)
+# Find process using port 8000
 lsof -i :8000
-
-# Kill the process
 kill -9 <PID>
 
 # Or use a different port
 uvicorn main:app --reload --port 8001
 ```
 
-### Module Import Errors
-
-**Error:** `ModuleNotFoundError: No module named 'fastapi'`
-
-**Solution:**
+**Module Import Errors**
 ```bash
-# Make sure virtual environment is activated
-source venv/bin/activate  # macOS/Linux
-# venv\Scripts\activate    # Windows
-
-# Reinstall dependencies
+# Ensure virtual environment is activated
+source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### Frontend Build Issues
+For more help, see `TROUBLESHOOTING.md` in the backend directory.
 
-**Error:** npm install fails
+## Contributing
 
-**Solution:**
-```bash
-# Clear npm cache
-npm cache clean --force
-
-# Delete node_modules and reinstall
-rm -rf node_modules package-lock.json
-npm install
-```
-
-### Need More Help?
-
-Check the `TROUBLESHOOTING.md` file in the backend directory or open an issue on GitHub.
-
-## 🤝 Contributing
-
-Contributions are welcome! Here's how you can help:
+Contributions are welcome! 
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
@@ -380,24 +221,19 @@ Contributions are welcome! Here's how you can help:
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-Please make sure to:
-- Follow the existing code style
-- Add tests for new features
-- Update documentation as needed
+Please follow the existing code style, add tests for new features, and update documentation as needed.
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
-- **Groq** for providing fast LLM inference
-- **Tavily** for AI-powered web search capabilities
-- **LangGraph** for multi-agent orchestration framework
+- Groq for fast LLM inference
+- Tavily for AI-powered web search
+- LangGraph for multi-agent orchestration
 
 ---
-
-**Built with ❤️ for strategic foresight and scenario planning**
 
 For questions or feedback, please open an issue on GitHub.
 

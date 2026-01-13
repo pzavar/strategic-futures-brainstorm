@@ -147,6 +147,11 @@ class AnalysisPipeline:
                 # Use scenario title or number as key
                 scenario_key = scenario.get("title", f"scenario_{scenario.get('scenario_number', i+1)}")
                 strategies_dict[scenario_key] = strategies
+                
+                # Add a small delay between strategy generation to avoid rate limits
+                # (except after the last scenario)
+                if i < num_scenarios - 1:
+                    await asyncio.sleep(1)
             
             state["strategies"] = strategies_dict
             state["current_step"] = "strategies"

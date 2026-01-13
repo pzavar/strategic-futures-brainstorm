@@ -13,8 +13,8 @@ class GroqService:
     
     BASE_URL = "https://api.groq.com/openai/v1"
     MODEL = "llama-3.1-8b-instant"  # Fast, reliable model - commonly available
-    MAX_RETRIES = 3
-    RETRY_DELAY = 1  # seconds
+    MAX_RETRIES = 5  # Increased for rate limiting
+    RETRY_DELAY = 2  # seconds - increased base delay for rate limits
     
     def __init__(self):
         self.api_key = settings.GROQ_API_KEY
@@ -32,7 +32,8 @@ class GroqService:
         prompt: str,
         system_prompt: Optional[str] = None,
         temperature: float = 0.7,
-        max_tokens: int = 2000
+        max_tokens: int = 2000,
+        json_mode: bool = False
     ) -> str:
         """
         Generate text using Groq API with retry logic
@@ -42,6 +43,7 @@ class GroqService:
             system_prompt: Optional system prompt
             temperature: Sampling temperature (0.0 to 1.0)
             max_tokens: Maximum tokens to generate
+            json_mode: If True, forces the model to return valid JSON
             
         Returns:
             Generated text
@@ -53,7 +55,7 @@ class GroqService:
         
         # Hardcode model name to avoid any caching issues
         model_name = "llama-3.1-8b-instant"  # Hardcoded to ensure it's used
-        logger.info(f"[GROQ] Using model: {model_name} for request")
+        logger.info(f"[GROQ] Using model: {model_name} for request (JSON mode: {json_mode})")
         
         payload = {
             "model": model_name,  # Hardcoded model name
@@ -61,6 +63,10 @@ class GroqService:
             "temperature": temperature,
             "max_tokens": max_tokens
         }
+        
+        # Enable JSON mode if requested
+        if json_mode:
+            payload["response_format"] = {"type": "json_object"}
         
         for attempt in range(self.MAX_RETRIES):
             try:

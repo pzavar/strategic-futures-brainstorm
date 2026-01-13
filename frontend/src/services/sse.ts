@@ -10,6 +10,8 @@ export class SSEClient {
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
   private reconnectDelay = 1000;
+  private shouldReconnect = true;
+  private isTerminalState = false;
 
   constructor(
     private url: string,
@@ -130,10 +132,14 @@ export class SSEClient {
     this.eventSource.addEventListener('analysis_complete', (event: any) => {
       try {
         const data = JSON.parse(event.data);
+        this.isTerminalState = true;
+        this.shouldReconnect = false;
         this.onMessage({
           event: 'analysis_complete',
           data,
         });
+        // Close connection after completion
+        this.disconnect();
       } catch (error) {
         console.error('Error parsing SSE analysis_complete:', error);
       }
@@ -154,10 +160,14 @@ export class SSEClient {
     this.eventSource.addEventListener('analysis_failed', (event: any) => {
       try {
         const data = JSON.parse(event.data);
+        this.isTerminalState = true;
+        this.shouldReconnect = false;
         this.onMessage({
           event: 'analysis_failed',
           data,
         });
+        // Close connection after failure
+        this.disconnect();
       } catch (error) {
         console.error('Error parsing SSE analysis_failed:', error);
       }
@@ -176,6 +186,22 @@ export class SSEClient {
     });
 
     this.eventSource.onerror = (error) => {
+      console.log('[SSE] Error event received', {
+        readyState: this.eventSource?.readyState,
+        isTerminalState: this.isTerminalState,
+        shouldReconnect: this.shouldReconnect,
+        reconnectAttempts: this.reconnectAttempts
+      });
+
+      // Don't reconnect if we're in a terminal state (completed/failed)
+      if (this.isTerminalState || !this.shouldReconnect) {
+        console.log('[SSE] Terminal state reached, not reconnecting');
+        if (this.onError) {
+          this.onError(error);
+        }
+        return;
+      }
+
       // If connection is closed (readyState === 2), it might be intentional (analysis completed)
       // Only reconnect if we haven't received a completion event
       if (this.eventSource?.readyState === EventSource.CLOSED) {
@@ -188,10 +214,14 @@ export class SSEClient {
         // Still connecting, might be a temporary issue
         if (this.reconnectAttempts < this.maxReconnectAttempts) {
           this.reconnectAttempts++;
+          console.log(`[SSE] Reconnecting (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
           setTimeout(() => {
-            this.connect();
+            if (this.shouldReconnect && !this.isTerminalState) {
+              this.connect();
+            }
           }, this.reconnectDelay * this.reconnectAttempts);
         } else {
+          console.log('[SSE] Max reconnection attempts reached');
           if (this.onError) {
             this.onError(error);
           }
@@ -206,6 +236,8 @@ export class SSEClient {
   }
 
   disconnect(): void {
+    console.log('[SSE] Disconnecting');
+    this.shouldReconnect = false;
     if (this.eventSource) {
       this.eventSource.close();
       this.eventSource = null;

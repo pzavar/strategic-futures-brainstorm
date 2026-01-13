@@ -89,14 +89,30 @@ export const useAnalysisStream = (analysisId: number | null) => {
                 message: 'Analysis completed successfully!',
                 progress: 100,
               });
+              // Stop polling and disconnect
+              if (statusPollIntervalRef.current) {
+                clearInterval(statusPollIntervalRef.current);
+                statusPollIntervalRef.current = null;
+              }
+              if (clientRef.current) {
+                clientRef.current.disconnect();
+              }
             } else if (data.status === 'failed') {
               currentStepRef.current = 'failed';
               setStatus({
                 currentStep: 'failed',
-                message: 'Analysis failed',
+                message: data.message || 'Analysis failed',
                 progress: 0,
               });
-              setError('Analysis failed');
+              setError(data.message || 'Analysis failed');
+              // Stop polling and disconnect
+              if (statusPollIntervalRef.current) {
+                clearInterval(statusPollIntervalRef.current);
+                statusPollIntervalRef.current = null;
+              }
+              if (clientRef.current) {
+                clientRef.current.disconnect();
+              }
             } else if (data.status === 'processing') {
               currentStepRef.current = 'processing';
               setStatus({

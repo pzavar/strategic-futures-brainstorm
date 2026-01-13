@@ -2,8 +2,38 @@ from typing import List, Dict, Any
 from app.services.groq_service import groq_service
 import json
 import logging
+import re
 
 logger = logging.getLogger(__name__)
+
+
+def sanitize_json_string(text: str) -> str:
+    """
+    Sanitize a JSON string by escaping control characters
+    that can cause JSON parsing errors.
+    """
+    # First, temporarily mark already-escaped characters
+    text = text.replace('\\n', '\x00ESCAPED_NEWLINE\x00')
+    text = text.replace('\\t', '\x00ESCAPED_TAB\x00')
+    text = text.replace('\\r', '\x00ESCAPED_RETURN\x00')
+    text = text.replace('\\\\', '\x00ESCAPED_BACKSLASH\x00')
+    
+    # Now escape actual control characters (including \n, \t, \r)
+    # Replace newlines with escaped newlines
+    text = text.replace('\n', '\\n')
+    text = text.replace('\r', '\\r')
+    text = text.replace('\t', '\\t')
+    
+    # Remove any other control characters (ASCII 0-31 except those we just handled)
+    text = re.sub(r'[\x00-\x08\x0B-\x0C\x0E-\x1F]', '', text)
+    
+    # Restore the already-escaped characters
+    text = text.replace('\x00ESCAPED_BACKSLASH\x00', '\\\\')
+    text = text.replace('\x00ESCAPED_NEWLINE\x00', '\\n')
+    text = text.replace('\x00ESCAPED_TAB\x00', '\\t')
+    text = text.replace('\x00ESCAPED_RETURN\x00', '\\r')
+    
+    return text
 
 
 async def scenario_agent(company_name: str, company_context: str) -> List[Dict[str, Any]]:
@@ -30,34 +60,43 @@ Generate 4 scenarios that explore different combinations of:
 3. Regulatory environment: permissive vs restrictive
 4. Economic conditions: growth vs constraint
 
-Each scenario should be distinct and cover different strategic possibilities. For each scenario, provide:
+Each scenario should be distinct and cover different strategic possibilities.
+
+IMPORTANT: 
+- Use the specific financial data and metrics from the company context in your scenarios
+- Reference current revenue, growth rates, and market position when describing future trajectories
+- Scenarios should be grounded in the company's actual financial situation and market position
+
+You must return a JSON object with a "scenarios" array. Each scenario must have these fields:
 - title: A descriptive title (max 100 chars)
 - description: 2-3 paragraphs describing the scenario
 - timeline: When this scenario might unfold (e.g., "2025-2030", "Next 3-5 years")
 - key_assumptions: Key assumptions underlying this scenario
 - likelihood: A probability estimate between 0.0 and 1.0
 
-Return ONLY a JSON array with this exact structure:
-[
-  {{
-    "title": "Scenario Title",
-    "description": "2-3 paragraphs...",
-    "timeline": "2025-2030",
-    "key_assumptions": "Key assumptions...",
-    "likelihood": 0.25
-  }},
-  ...
-]
+Return valid JSON in this exact structure:
+{{
+  "scenarios": [
+    {{
+      "title": "Scenario Title Here",
+      "description": "Description paragraphs here",
+      "timeline": "2025-2030",
+      "key_assumptions": "Key assumptions here",
+      "likelihood": 0.25
+    }}
+  ]
+}}
 
-Ensure scenarios are diverse and cover different strategic futures.
+Ensure all string values are properly quoted and escaped. Generate exactly 4 diverse scenarios.
 """
     
     try:
         response = await groq_service.generate(
             prompt=scenario_prompt,
-            system_prompt="You are a strategic futurist. Generate diverse, plausible future scenarios based on research.",
+            system_prompt="You are a strategic futurist. You must return valid JSON only.",
             temperature=0.8,
-            max_tokens=3000
+            max_tokens=3000,
+            json_mode=True
         )
         
         # Log the raw response for debugging
@@ -66,32 +105,24 @@ Ensure scenarios are diverse and cover different strategic futures.
         # Parse scenarios from response
         scenarios_text = response.strip()
         
-        # Remove markdown code blocks if present
-        if scenarios_text.startswith("```"):
-            # Find the closing ```
-            parts = scenarios_text.split("```")
-            if len(parts) >= 3:
-                scenarios_text = parts[1]  # Take content between first pair of ```
-                if scenarios_text.startswith("json"):
-                    scenarios_text = scenarios_text[4:]
-            else:
-                # Malformed markdown, try to extract JSON
-                scenarios_text = scenarios_text.replace("```json", "").replace("```", "")
+        logger.info(f"[PARSE] Original response length: {len(scenarios_text)} chars")
+        logger.info(f"[PARSE] Response preview: {scenarios_text[:200]}")
         
-        scenarios_text = scenarios_text.strip()
-        
-        # Try to extract JSON array from text if there's extra content
-        # Look for the first '[' and last ']'
-        first_bracket = scenarios_text.find('[')
-        last_bracket = scenarios_text.rfind(']')
-        
-        if first_bracket != -1 and last_bracket != -1 and last_bracket > first_bracket:
-            scenarios_text = scenarios_text[first_bracket:last_bracket + 1]
-        
-        if not scenarios_text or scenarios_text.strip() == "":
+        # JSON mode should return clean JSON, but still validate
+        if not scenarios_text:
             raise ValueError("Empty response from Groq")
         
-        scenarios = json.loads(scenarios_text)
+        # Parse the JSON response
+        data = json.loads(scenarios_text)
+        
+        # Extract scenarios array from the response
+        if isinstance(data, dict) and "scenarios" in data:
+            scenarios = data["scenarios"]
+        elif isinstance(data, list):
+            # Fallback: if it's already a list
+            scenarios = data
+        else:
+            raise ValueError(f"Unexpected response structure: {type(data)}")
         if not isinstance(scenarios, list):
             raise ValueError("Scenarios response is not a list")
         

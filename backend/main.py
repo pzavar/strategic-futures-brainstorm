@@ -65,16 +65,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Request logging middleware with comprehensive error handling
+# Request error logging middleware (only logs errors, not every request)
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
     start_time = time.time()
-    logger.info(f"[REQUEST] {request.method} {request.url.path} - Client: {request.client.host if request.client else 'unknown'}")
     
     try:
         response = await call_next(request)
-        process_time = time.time() - start_time
-        logger.info(f"[REQUEST] {request.method} {request.url.path} - Status: {response.status_code} - Time: {process_time:.3f}s")
         return response
     except Exception as e:
         process_time = time.time() - start_time

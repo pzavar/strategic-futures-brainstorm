@@ -20,7 +20,6 @@ The application provides real-time progress updates using Server-Sent Events (SS
 - Diverse scenario planning based on strategic frameworks
 - Actionable recommendations for each scenario
 - Analysis history to save and revisit previous analyses
-- JWT-based authentication
 - Modern, responsive UI built with React and TailwindCSS
 
 ## Tech Stack
@@ -32,7 +31,6 @@ The application provides real-time progress updates using Server-Sent Events (SS
 - LangGraph - Multi-agent orchestration
 - Groq API - LLM inference (Llama 3.1 70B)
 - Tavily API - Web search
-- JWT - Authentication
 
 **Frontend**
 - React & TypeScript
@@ -58,34 +56,21 @@ You'll also need API keys (free tiers available):
 ### 1. Clone and Configure
 
 ```bash
-git clone https://github.com/yourusername/strategic-futures-brainstorm.git
+git clone https://github.com/pzavar/strategic-futures-brainstorm.git
 cd strategic-futures-brainstorm
 ```
 
 ### 2. Set Up Environment Variables
 
-Create backend configuration:
-```bash
-cd backend
-cp .env.example .env
-```
-
-Edit `backend/.env` with your values:
+Create `backend/.env` file with your values:
 ```bash
 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/strategic_futures_db
 GROQ_API_KEY=your_groq_api_key
 TAVILY_API_KEY=your_tavily_api_key
-JWT_SECRET=your_secure_random_string  # Generate with: openssl rand -hex 32
 CORS_ORIGINS=http://localhost:5173,http://localhost:3000
 ```
 
-Create frontend configuration:
-```bash
-cd ../frontend
-cp .env.example .env
-```
-
-The default values should work for local development:
+Create `frontend/.env` file (default values should work for local development):
 ```bash
 VITE_API_URL=http://localhost:8000
 ```
@@ -135,10 +120,8 @@ npm run dev
 
 Open your browser to [http://localhost:5173](http://localhost:5173)
 
-1. Register an account
-2. Log in
-3. Enter a company name to analyze
-4. Watch the AI agents work in real-time
+1. Enter a company name to analyze
+2. Watch the AI agents work in real-time
 
 ## Project Structure
 
@@ -147,9 +130,9 @@ strategic-futures-brainstorm/
 ├── backend/
 │   ├── app/
 │   │   ├── agents/           # LangGraph AI agents (pipeline, research, scenario, strategy)
-│   │   ├── api/              # API routes (analyses, auth) and dependencies
+│   │   ├── api/              # API routes (analyses) and dependencies
 │   │   ├── core/             # Configuration, database, security
-│   │   ├── models/           # SQLAlchemy models (analysis, scenario, strategy, user)
+│   │   ├── models/           # SQLAlchemy models (analysis, scenario, strategy, search_query)
 │   │   └── services/         # External API clients (Groq, Tavily)
 │   ├── alembic/              # Database migrations
 │   ├── tests/                # Unit and integration tests
@@ -159,7 +142,7 @@ strategic-futures-brainstorm/
     └── src/
         ├── components/       # React components
         ├── pages/            # Page components
-        ├── services/         # API clients (REST, SSE, auth)
+        ├── services/         # API clients (REST, SSE)
         ├── hooks/            # Custom React hooks
         └── App.tsx           # Root component
 ```
@@ -169,10 +152,8 @@ strategic-futures-brainstorm/
 Once running, visit [http://localhost:8000/docs](http://localhost:8000/docs) for interactive Swagger UI documentation.
 
 **Key Endpoints:**
-- `POST /api/auth/register` - Register a new user
-- `POST /api/auth/login` - Login and receive JWT token
 - `POST /api/analyses` - Create a new analysis
-- `GET /api/analyses` - List all user's analyses
+- `GET /api/analyses` - List all analyses
 - `GET /api/analyses/{id}` - Get specific analysis details
 - `GET /api/analyses/{id}/stream` - SSE stream for real-time updates
 

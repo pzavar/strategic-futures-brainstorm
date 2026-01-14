@@ -38,9 +38,9 @@ Format: {{"questions": ["Question 1?", "Question 2?", ...]}}
     try:
         questions_response = await groq_service.generate(
             prompt=questions_prompt,
-            system_prompt="You are a strategic research analyst. You must return valid JSON only.",
+            system_prompt="You are a strategic research analyst for S&P 500 companies and all-things tech/finance/economy expert. You must return valid JSON only.",
             temperature=0.7,
-            max_tokens=500,
+            max_tokens=700,
             json_mode=True
         )
         
@@ -143,9 +143,9 @@ Format as a well-structured markdown document with clear sections.
     try:
         company_context = await groq_service.generate(
             prompt=synthesis_prompt,
-            system_prompt="You are a strategic analyst. Include specific financial metrics and cite sources with URLs.",
+            system_prompt="You are a strategic business analyst with a deep understanding of industry analysis and market research. Include specific financial metrics and cite sources with URLs.",
             temperature=0.7,
-            max_tokens=3000  # Increased to accommodate financial data and citations
+            max_tokens=4000  # Increased to accommodate financial data and citations
         )
         logger.info("Successfully synthesized company context")
     except Exception as e:
